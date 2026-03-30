@@ -8,6 +8,11 @@ class IcecreambobcatSshfs < Formula
   sha256 "99d294101f1b8997653a84c35674c2e50c18323ea2c449412c0ed46b9d31ac35"
   license any_of: ["LGPL-2.1-only", "GPL-2.0-only"]
 
+  bottle do
+    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/icecreambobcat-sshfs-3.7.5"
+    sha256 cellar: :any, arm64_tahoe: "1e4629276114856ed170977ffb098ca31bc40faaffe5fd91e299280941a22aaa"
+  end
+
   depends_on "coreutils" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
