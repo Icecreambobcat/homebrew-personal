@@ -5,7 +5,7 @@ class Zathura < Formula
   version "2026.10.23"
   sha256 "ef11f15cb121fc6499136563d9f8b0ccdb2140dcd65e7a1338995ccaacd65970"
   license "Zlib"
-  revision 3
+  revision 5
 
   depends_on "dbus"
   depends_on "glib"
