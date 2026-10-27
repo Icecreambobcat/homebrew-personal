@@ -5,7 +5,7 @@ class ZathuraCore < Formula
   version "2026.10.23"
   sha256 "ef11f15cb121fc6499136563d9f8b0ccdb2140dcd65e7a1338995ccaacd65970"
   license "Zlib"
-  revision 1
+  revision 2
 
   keg_only "the zathura formula provides the launcher and app"
 
@@ -88,6 +88,67 @@ diff --git a/zathura/main.c b/zathura/main.c
 +  g_log_set_writer_func(filter_skipped_frame_warning, NULL, NULL);
 +#endif
    init_locale();
+diff --git a/zathura/main.c b/zathura/main.c
+--- a/zathura/main.c
++++ b/zathura/main.c
+@@ -137,6 +137,7 @@ typedef struct {
+   int page_number;
+   char** argv;
+   zathura_t* zathura;
++  bool opened_file;
+ } zathura_app_ctx_t;
+ 
+ static void cb_app_startup(GApplication* app, gpointer data) {
+@@ -168,6 +169,49 @@ static void cb_app_open(GApplication* UNUSED(app), GFile** files, gint n_files,
+     return;
+   }
+ 
++#ifdef __APPLE__
++  /* Launch Services sends later open requests to the running app. Each
++   * document needs its own process, just like multiple CLI arguments. */
++  int first = ctx->opened_file ? 0 : 1;
++  ctx->opened_file = true;
++  for (int i = first; i < n_files; ++i) {
++    g_autofree char* child_path = g_file_get_path(files[i]);
++    if (child_path == NULL) {
++      girara_error("Failed to determine path for the given file.");
++      continue;
++    }
++    GPtrArray* args = g_ptr_array_new();
++    g_ptr_array_add(args, ctx->argv[0]);
++    if (ctx->config_dir) {
++      g_ptr_array_add(args, "--config-dir");
++      g_ptr_array_add(args, (gpointer)ctx->config_dir);
++    }
++    if (ctx->data_dir) {
++      g_ptr_array_add(args, "--data-dir");
++      g_ptr_array_add(args, (gpointer)ctx->data_dir);
++    }
++    if (ctx->cache_dir) {
++      g_ptr_array_add(args, "--cache-dir");
++      g_ptr_array_add(args, (gpointer)ctx->cache_dir);
++    }
++    if (ctx->plugin_path) {
++      g_ptr_array_add(args, "--plugins-dir");
++      g_ptr_array_add(args, (gpointer)ctx->plugin_path);
++    }
++    g_ptr_array_add(args, "--");
++    g_ptr_array_add(args, child_path);
++    g_ptr_array_add(args, NULL);
++    g_autoptr(GError) error = NULL;
++    if (!g_spawn_async(NULL, (char**)args->pdata, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, &error)) {
++      girara_error("Could not open document: %s", error->message);
++    }
++    g_ptr_array_free(args, TRUE);
++  }
++  if (first == 0) {
++    return;
++  }
++#endif
++
+   /* gfile turns a plain dash into an absolute path which breaks stdin so keep the raw argument */
+   g_autofree char* gfile_path = NULL;
+   const char* path            = NULL;
 diff --git a/zathura/content-type.c b/zathura/content-type.c
 --- a/zathura/content-type.c
 +++ b/zathura/content-type.c
