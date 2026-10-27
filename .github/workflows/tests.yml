@@ -31,7 +31,8 @@ jobs:
           key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ matrix.os }}-rubygems-
 
-      - run: brew install --cask macfuse
+      - name: Trust this tap
+        run: brew trust --tap "$GITHUB_REPOSITORY"
 
       - run: brew test-bot --only-cleanup-before
 
