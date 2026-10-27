@@ -19,6 +19,14 @@ os.environ["XDG_DATA_DIRS"] = "@@HOMEBREW_PREFIX@@/share:" + os.environ.get("XDG
 
 # Informational commands do not need a session bus.
 if not any(arg in ("--help", "-h", "--version", "-v") for arg in sys.argv[1:]):
+    # Registration needs the user's GUI session, not Homebrew's install sandbox.
+    try:
+        subprocess.run([
+            "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+            "-f", str(macos.parent.parent),
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
     runtime = Path("/tmp") / f"zathura-{os.getuid()}-homebrew"
     runtime.mkdir(mode=0o700, exist_ok=True)
     info = runtime.lstat()

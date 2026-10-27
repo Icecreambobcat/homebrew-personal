@@ -5,6 +5,7 @@ class Zathura < Formula
   version "2026.10.23"
   sha256 "ef11f15cb121fc6499136563d9f8b0ccdb2140dcd65e7a1338995ccaacd65970"
   license "Zlib"
+  revision 1
 
   depends_on "dbus"
   depends_on "glib"
@@ -59,9 +60,6 @@ class Zathura < Formula
     run "/usr/bin/codesign",
         args:           ["--force", "--deep", "--sign", "-", "{{opt_prefix}}/Zathura.app"],
         writable_paths: ["Zathura.app"]
-    # Register supported formats without selecting any default handlers.
-    run "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
-        args: ["-f", "{{opt_prefix}}/Zathura.app"]
   end
 
   def caveats
@@ -69,6 +67,7 @@ class Zathura < Formula
       Open the app with:
         open -a "#{opt_prefix}/Zathura.app"
 
+      Launch the app once to register its file types.
       To show it in ~/Applications, create a symlink to:
         #{opt_prefix}/Zathura.app
 

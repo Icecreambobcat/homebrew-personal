@@ -40,7 +40,7 @@ Patches are embedded in their owning formulae: API metadata in `synctex.rb`, ini
 
 ## App and default openers
 
-The app is installed at `$(brew --prefix zathura)/Zathura.app`. Homebrew registers its document types with Launch Services. An optional Finder-visible link can be created without copying the bundle:
+The app is installed at `$(brew --prefix zathura)/Zathura.app`. The launcher registers its document types with Launch Services when opening the viewer; launch it once after installation. Registration cannot run inside Homebrew’s install sandbox. An optional Finder-visible link can be created without copying the bundle:
 
 ```sh
 mkdir -p ~/Applications
@@ -67,7 +67,7 @@ Set an inverse callback in `zathurarc`, using the installed Neovim path:
 
 ```text
 set synctex true
-set synctex-editor-command "/opt/homebrew/bin/nvim --headless -c \\"VimtexInverseSearch %{line}:%{column} '%{input}'\\""
+set synctex-editor-command "/opt/homebrew/bin/nvim --headless -c \"VimtexInverseSearch %{line}:%{column} '%{input}'\""
 ```
 
 On Intel Macs, replace `/opt/homebrew` with the Homebrew prefix. The callback requires VimTeX to load in the headless Neovim process as well as in the editing instance. VimTeX can supply its own callback through `-x`; `ZATHURA_SYNCTEX_EDITOR` is also supported. No smoke-test callback or editor dependency is bundled.
@@ -82,4 +82,4 @@ The existing Homebrew test-bot workflow builds/tests changed formulae and upload
 
 Local packaging verification used fresh pinned source archives and the embedded patches, generated the manuals, compiled all four plugins, exercised the app formula’s assembly with staged dependency paths, verified its strict signature, opened two-page PDF/DjVu/PS/CBZ/CBT/XPS fixtures, and checked repeated forward SyncTeX and the parsed personal callback. XPS content was also opened with an `.oxps` extension; this is not a genuine OpenXPS conformance test. Launch Services listed the app as a Viewer for all 24 declared types.
 
-That staged check is not a clean `brew install` or a published-bottle test. The earlier handoff verified reload and real-click inverse search; those were not repeated for this package. RAR/7-Zip rendering, live-viewer bus reconnection, reboot recovery and Intel builds remain unverified. Trackpad smoothness is unchanged.
+A subsequent Homebrew source install and all seven formula tests passed, including strict verification of the installed app signature. Launch Services registration runs on normal viewer startup because Homebrew’s install sandbox blocks it. Published bottles have not been tested. The earlier handoff verified reload and real-click inverse search; those were not repeated for this package. RAR/7-Zip rendering, live-viewer bus reconnection, reboot recovery and Intel builds remain unverified. Trackpad smoothness is unchanged.
