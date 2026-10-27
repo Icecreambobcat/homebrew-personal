@@ -5,6 +5,7 @@ class ZathuraCore < Formula
   version "2026.10.23"
   sha256 "ef11f15cb121fc6499136563d9f8b0ccdb2140dcd65e7a1338995ccaacd65970"
   license "Zlib"
+  revision 1
 
   keg_only "the zathura formula provides the launcher and app"
 
@@ -44,6 +45,49 @@ class ZathuraCore < Formula
 end
 
 __END__
+diff --git a/zathura/main.c b/zathura/main.c
+--- a/zathura/main.c
++++ b/zathura/main.c
+@@ -26,6 +26,31 @@
+ #if defined(WITH_SYNCTEX) && !defined(WITH_SANDBOX)
+ #include "dbus-interface.h"
+ #include "synctex.h"
+ #endif
++
++#ifdef __APPLE__
++/* Silence this GTK warning without hiding other diagnostics. */
++static GLogWriterOutput filter_skipped_frame_warning(GLogLevelFlags level, const GLogField* fields,
++                                                    gsize n_fields, gpointer user_data) {
++  const char* domain = NULL;
++  const char* message = NULL;
++  for (gsize i = 0; i < n_fields; ++i) {
++    if (fields[i].length != -1) {
++      continue;
++    }
++    if (g_strcmp0(fields[i].key, "GLIB_DOMAIN") == 0) {
++      domain = fields[i].value;
++    } else if (g_strcmp0(fields[i].key, "MESSAGE") == 0) {
++      message = fields[i].value;
++    }
++  }
++  if ((level & G_LOG_LEVEL_MASK) == G_LOG_LEVEL_WARNING && !(level & G_LOG_FLAG_FATAL) &&
++      g_strcmp0(domain, "Gdk") == 0 &&
++      g_strcmp0(message, "gdk_frame_timings_presented() called on skipped frame.") == 0) {
++    return G_LOG_WRITER_HANDLED;
++  }
++  return g_log_writer_default(level, fields, n_fields, user_data);
++}
++#endif
+-
++
+ #if defined(WITH_SYNCTEX) && !defined(WITH_SANDBOX)
+@@ -233,3 +258,6 @@
+ /* main function */
+ GIRARA_VISIBLE int main(int argc, char* argv[]) {
++#ifdef __APPLE__
++  g_log_set_writer_func(filter_skipped_frame_warning, NULL, NULL);
++#endif
+   init_locale();
 diff --git a/zathura/content-type.c b/zathura/content-type.c
 --- a/zathura/content-type.c
 +++ b/zathura/content-type.c
