@@ -5,7 +5,7 @@ class ZathuraCore < Formula
   version "2026.10.23"
   sha256 "ef11f15cb121fc6499136563d9f8b0ccdb2140dcd65e7a1338995ccaacd65970"
   license "Zlib"
-  revision 2
+  revision 5
 
   keg_only "the zathura formula provides the launcher and app"
 
