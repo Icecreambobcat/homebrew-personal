@@ -9,10 +9,8 @@ on:
 
 jobs:
   test-bot:
-    strategy:
-      matrix:
-        os: [ macos-15-intel, macos-26 ]
-    runs-on: ${{ matrix.os }}
+    # GitHub's macOS 27 ARM64 image uses the xcode-27 label.
+    runs-on: xcode-27
     timeout-minutes: 60
     permissions:
       actions: read
@@ -20,6 +18,11 @@ jobs:
       contents: read
       pull-requests: read
     steps:
+      - name: Verify macOS 27 on Apple Silicon
+        run: |
+          test "$RUNNER_ARCH" = ARM64
+          [[ "$(sw_vers -productVersion)" == 27.* ]]
+
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@main
@@ -30,8 +33,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
-          key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
-          restore-keys: ${{ matrix.os }}-rubygems-
+          key: macos-27-arm64-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: macos-27-arm64-rubygems-
 
       - name: Trust this tap
         run: brew trust --tap "$GITHUB_REPOSITORY"
@@ -58,9 +61,9 @@ jobs:
             FULL_STACK=true
           fi
           brew test-bot "${args[@]}"
-          if [[ "$FULL_STACK" == true && "$RUNNER_ARCH" == ARM64 ]]; then
+          if [[ "$FULL_STACK" == true ]]; then
             for formula in synctex zathura-core zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb zathura; do
-              compgen -G "$formula--*.bottle.json" > /dev/null
+              compgen -G "$formula--*.arm64_golden_gate.bottle.json" > /dev/null
             done
           fi
 
@@ -68,5 +71,5 @@ jobs:
         if: always() && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-artifact@v4
         with:
-          name: bottles_${{ matrix.os }}
+          name: bottles_arm64_golden_gate
           path: '*.bottle.*'

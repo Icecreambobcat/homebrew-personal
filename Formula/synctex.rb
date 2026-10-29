@@ -12,7 +12,8 @@ class Synctex < Formula
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkgconf" => :build
-  depends_on :macos
+  depends_on arch: :arm64
+  depends_on macos: :golden_gate
   depends_on "zlib"
 
   def install

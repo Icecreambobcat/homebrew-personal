@@ -7,6 +7,7 @@ class Zathura < Formula
   license "Zlib"
   revision 8
 
+  depends_on arch: :arm64
   depends_on "cairo"
   depends_on "dbus"
   depends_on "gettext"
@@ -22,7 +23,7 @@ class Zathura < Formula
   depends_on "icecreambobcat/personal/zathura-ps"
   depends_on "json-glib"
   depends_on "libmagic"
-  depends_on :macos
+  depends_on macos: :golden_gate
   depends_on "pango"
   depends_on "python@3.15"
   depends_on "sqlite"

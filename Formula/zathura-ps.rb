@@ -11,11 +11,12 @@ class ZathuraPs < Formula
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkgconf" => :build
+  depends_on arch: :arm64
   depends_on "cairo"
   depends_on "girara"
   depends_on "glib"
   depends_on "libspectre"
-  depends_on :macos
+  depends_on macos: :golden_gate
 
   def install
     system "meson", "setup", "build", *std_meson_args, "-Dplugindir=#{lib}/zathura"

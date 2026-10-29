@@ -12,10 +12,11 @@ class ZathuraPdfMupdf < Formula
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkgconf" => :build
+  depends_on arch: :arm64
   depends_on "cairo"
   depends_on "girara"
   depends_on "glib"
-  depends_on :macos
+  depends_on macos: :golden_gate
   depends_on "mupdf"
 
   def install

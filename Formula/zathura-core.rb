@@ -13,6 +13,7 @@ class ZathuraCore < Formula
   depends_on "ninja" => :build
   depends_on "pkgconf" => :build
   depends_on "sphinx-doc" => :build
+  depends_on arch: :arm64
   depends_on "cairo"
   depends_on "gettext"
   depends_on "girara"
@@ -22,7 +23,7 @@ class ZathuraCore < Formula
   depends_on "icecreambobcat/personal/synctex"
   depends_on "json-glib"
   depends_on "libmagic"
-  depends_on :macos
+  depends_on macos: :golden_gate
   depends_on "pango"
   depends_on "sqlite"
   depends_on "xxhash"
