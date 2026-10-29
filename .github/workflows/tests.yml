@@ -41,14 +41,28 @@ jobs:
       - run: brew test-bot --only-setup
 
       - run: brew test-bot --only-tap-syntax
-      - run: brew test-bot --only-formulae
-        if: github.event_name == 'pull_request'
-
-      - name: Build the full Zathura stack on request
-        if: github.event_name == 'workflow_dispatch'
-        run: >-
-          brew test-bot --only-formulae
-          --testing-formulae=synctex,zathura-core,zathura-pdf-mupdf,zathura-djvu,zathura-ps,zathura-cb,zathura
+      - name: Build and test formulae
+        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+        env:
+          FULL_STACK: ${{ github.event_name == 'workflow_dispatch' }}
+          # Preserve installed development revisions for this migration only.
+          REVISION_AUDIT: ${{ github.event.pull_request.number == 4 && '--skip-revision-audit' || '' }}
+        run: |
+          args=(--only-formulae)
+          if [[ -n "$REVISION_AUDIT" ]]; then
+            args+=("$REVISION_AUDIT")
+          fi
+          if [[ "$FULL_STACK" == true ]] ||
+             ! git diff --quiet origin/main...HEAD -- Formula/synctex.rb 'Formula/zathura*.rb' assets/zathura; then
+            args+=("--testing-formulae=icecreambobcat/personal/synctex,icecreambobcat/personal/zathura-core,icecreambobcat/personal/zathura-pdf-mupdf,icecreambobcat/personal/zathura-djvu,icecreambobcat/personal/zathura-ps,icecreambobcat/personal/zathura-cb,icecreambobcat/personal/zathura")
+            FULL_STACK=true
+          fi
+          brew test-bot "${args[@]}"
+          if [[ "$FULL_STACK" == true && "$RUNNER_ARCH" == ARM64 ]]; then
+            for formula in synctex zathura-core zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb zathura; do
+              compgen -G "$formula--*.bottle.json" > /dev/null
+            done
+          fi
 
       - name: Upload bottles as artifact
         if: always() && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')

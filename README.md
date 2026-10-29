@@ -80,7 +80,7 @@ CLI and app launches share a private per-user bus at `/tmp/zathura-<uid>/bus`. T
 
 Changes to app assets require a `zathura` revision bump. The app contains a copy of the core executable, so core updates also require rebuilding/bumping the top-level formula. An upstream plugin ABI change requires rebuilding the plugins together.
 
-The existing Homebrew test-bot workflow builds/tests changed formulae and uploads bottles for pull requests; the publishing workflow retains the `pr-pull` label flow. Direct pushes do not publish bottles automatically. Until bottles are published, the custom formulae build from source.
+The Homebrew test-bot workflow builds all seven packages for Zathura-related pull requests and manual runs, and checks that every Apple Silicon bottle was produced. Other pull requests use changed-formula detection. Intel builds can be skipped when dependencies lack compatible bottles; a green job alone does not verify them. The publishing workflow uses the `pr-pull` label. Direct pushes do not publish bottles automatically. Until bottles are published, the custom formulae build from source.
 
 Revision 8 builds from the tracked fork archives. Homebrew type checking, changed-formula style checks, strict audit, formula tests, linkage and strict bundle-signature verification passed locally. Native ASan/UBSan tests passed, including session isolation, pending-open cancellation and inverse-callback source routing. Live geometry regression passed eight float/retile cycles and six neighbouring-window open/close cycles in both the isolated test app and the installed app. The installed app also passed Launch Services multi-file reuse, stdin cleanup and independent document closure.
 
