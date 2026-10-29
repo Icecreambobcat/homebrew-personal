@@ -1,10 +1,11 @@
 class Synctex < Formula
   desc "TeX synchronisation parser with corrected API metadata"
   homepage "https://github.com/jlaurens/synctex"
-  url "https://github.com/jlaurens/synctex/archive/0668445124169be0be18d4b768cdf1be0b11a994.tar.gz"
+  url "https://github.com/Icecreambobcat/synctex/archive/5b29cf44a6f46d77e14d18129307744be7bd5fe7.tar.gz"
   version "2024"
-  sha256 "afd83bb58f5563272d1b78da2510564b06faf6162bb4ad179afae8c368c2865f"
+  sha256 "59ed88840bdbf10879de4e9b290a39e182e67446ef9f4057e967318683eb3218"
   license "MIT"
+  revision 1
 
   keg_only "avoid shadowing the SyncTeX command supplied by TeX distributions"
 
@@ -13,8 +14,6 @@ class Synctex < Formula
   depends_on "pkgconf" => :build
   depends_on :macos
   depends_on "zlib"
-
-  patch :DATA
 
   def install
     system "meson", "setup", "build", *std_meson_args
@@ -29,41 +28,3 @@ class Synctex < Formula
     assert_match "SyncTeX", shell_output("#{bin}/synctex help")
   end
 end
-
-__END__
-diff --git a/meson.build b/meson.build
-index a940709..f9c3818 100644
---- a/meson.build
-+++ b/meson.build
-@@ -1,6 +1,7 @@
- project('synctex', 'c')
- 
--version = '1.3'
-+# Keep aligned with synctex_parser_api_level.txt, not the parser release version.
-+version = '2.0.0'
- 
- pkg = import('pkgconfig')
- 
-@@ -35,16 +36,18 @@ synctex_dep = declare_dependency(
-   link_with: synctex_lib,
- )
- 
-+# Preserve the legacy flat include layout as well as namespaced consumers.
- install_headers(headers)
-+install_headers(headers, subdir: 'synctex')
- 
- pkg.generate(
-   name: 'synctex',
-   version: version,
--  libraries: 'synctex',
--  subdirs: 'synctex',
-+  libraries: synctex_lib,
-+  subdirs: '.',
-   description: 'SyncTeX parser library',
--  url: 'http://github.org/jlaurens/synctex',
--  install_dir: join_paths(get_option('prefix'), 'lib', 'pkgconfig'),
-+  url: 'https://github.com/jlaurens/synctex',
-+  install_dir: join_paths(get_option('libdir'), 'pkgconfig'),
- )
- 
- synctex_src = include_directories('.')

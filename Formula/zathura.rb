@@ -1,21 +1,32 @@
 class Zathura < Formula
   desc "GTK 4 Zathura app with MuPDF, DjVu, PostScript and comic plugins"
   homepage "https://pwmt.org/projects/zathura/"
-  url "https://github.com/pwmt/zathura/archive/839f3192e96cc811033ebe500dab4ac11449d59d.tar.gz"
+  url "https://github.com/Icecreambobcat/zathura/archive/c1060fec481cfde16f53097d0f6d35a58cf38e77.tar.gz"
   version "2026.10.23"
-  sha256 "ef11f15cb121fc6499136563d9f8b0ccdb2140dcd65e7a1338995ccaacd65970"
+  sha256 "2535436cf8bec6600ca5b1992f3180106f4ab436ed68f533692b895c3c8a9aee"
   license "Zlib"
-  revision 5
+  revision 8
 
+  depends_on "cairo"
   depends_on "dbus"
+  depends_on "gettext"
+  depends_on "girara"
   depends_on "glib"
+  depends_on "graphene"
+  depends_on "gtk4"
+  depends_on "icecreambobcat/personal/synctex"
   depends_on "icecreambobcat/personal/zathura-cb"
   depends_on "icecreambobcat/personal/zathura-core"
   depends_on "icecreambobcat/personal/zathura-djvu"
   depends_on "icecreambobcat/personal/zathura-pdf-mupdf"
   depends_on "icecreambobcat/personal/zathura-ps"
+  depends_on "json-glib"
+  depends_on "libmagic"
   depends_on :macos
+  depends_on "pango"
   depends_on "python@3.15"
+  depends_on "sqlite"
+  depends_on "xxhash"
 
   def install
     assets = tap.path/"assets/zathura"
@@ -25,16 +36,20 @@ class Zathura < Formula
     core = Formula["icecreambobcat/personal/zathura-core"]
     mkdir_p macos
     mkdir_p resources
-    cp core.opt_libexec/"zathura", macos/"zathura-bin"
-    cp assets/"launcher.py", macos/"zathura"
-    inreplace macos/"zathura" do |s|
+    cp core.opt_libexec/"zathura", macos/"zathura"
+    cp assets/"launcher.py", resources/"launcher.py"
+    inreplace resources/"launcher.py" do |s|
       s.gsub! "@@PYTHON@@", (formula_opt_bin("python@3.15")/"python3.15").to_s
       s.gsub! "@@HOMEBREW_PREFIX@@", HOMEBREW_PREFIX.to_s
       s.gsub! "@@GDBUS@@", (formula_opt_bin("glib")/"gdbus").to_s
       s.gsub! "@@DBUS@@", (formula_opt_bin("dbus")/"dbus-daemon").to_s
+      s.gsub! "@@PLUGINS@@", (opt_libexec/"plugins").to_s
+      s.gsub! "@@RUNTIME@@", "zathura"
     end
-    chmod 0755, macos/"zathura"
+    chmod 0755, resources/"launcher.py"
     cp assets/"Info.plist", app/"Contents/Info.plist"
+    system "/usr/libexec/PlistBuddy", "-c", "Set :CFBundleVersion #{version}.#{revision}",
+           app/"Contents/Info.plist"
     cp assets/"Zathura.icns", resources/"Zathura.icns"
     cp assets/"session.conf", resources/"session.conf"
     %w[zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb].each do |name|
@@ -89,6 +104,7 @@ class Zathura < Formula
     %w[pdf-mupdf djvu ps cb].each { |name| assert_match name, output }
     system "/usr/bin/plutil", "-lint", prefix/"Zathura.app/Contents/Info.plist"
     assert_path_exists prefix/"Zathura.app/Contents/Resources/Zathura.icns"
+    assert_match "Mach-O", shell_output("/usr/bin/file #{prefix}/Zathura.app/Contents/MacOS/zathura")
     system "/usr/bin/codesign", "--verify", "--deep", "--strict", prefix/"Zathura.app"
   end
 end

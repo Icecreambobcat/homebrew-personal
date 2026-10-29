@@ -1,10 +1,11 @@
 class ZathuraPdfMupdf < Formula
   desc "MuPDF document plugin for Zathura"
   homepage "https://pwmt.org/projects/zathura-pdf-mupdf/"
-  url "https://github.com/pwmt/zathura-pdf-mupdf/archive/02896d8a7f58a5b0596f62dc083b23a11d6e6e93.tar.gz"
+  url "https://github.com/Icecreambobcat/zathura-pdf-mupdf/archive/37440c30ebafcb17d0567522df6ef1fb4cf2f02a.tar.gz"
   version "2026.07.18"
-  sha256 "685027642478441e532afe04b1fb6fe35c604f727b5b0fe690ac7a345a3e9ed8"
+  sha256 "edf9849826ec91c3aa1268675d0ebfd0f72cc10dbba89c57fa8f634344c8ecfe"
   license "Zlib"
+  revision 1
 
   depends_on "gettext" => :build
   depends_on "icecreambobcat/personal/zathura-core" => :build
@@ -17,8 +18,6 @@ class ZathuraPdfMupdf < Formula
   depends_on :macos
   depends_on "mupdf"
 
-  patch :DATA
-
   def install
     system "meson", "setup", "build", *std_meson_args, "-Dplugindir=#{lib}/zathura"
     system "meson", "compile", "-C", "build"
@@ -29,16 +28,3 @@ class ZathuraPdfMupdf < Formula
     assert_path_exists lib/"zathura/libpdf-mupdf.dylib"
   end
 end
-
-__END__
-diff --git a/zathura-pdf-mupdf/plugin.c b/zathura-pdf-mupdf/plugin.c
---- a/zathura-pdf-mupdf/plugin.c
-+++ b/zathura-pdf-mupdf/plugin.c
-@@ -30,6 +30,7 @@
-                                        }),
-                                        ZATHURA_PLUGIN_MIMETYPES({
-                                            PDF_MIMETYPE "application/oxps",
-+                                           "application/vnd.ms-xpsdocument",
-                                            "application/epub+zip",
-                                            "application/x-fictionbook",
-                                            "application/x-mobipocket-ebook",

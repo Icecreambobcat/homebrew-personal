@@ -19,6 +19,8 @@ open -a "$(brew --prefix zathura)/Zathura.app" document.pdf
 
 The app depends on Homebrew libraries. It is not a standalone app that can be copied to another Mac.
 
+On macOS, document windows share one regular native app process and Dock icon. Reopening a document reuses its window; `q` or Cmd-W closes one window, while Cmd-Q quits the app. Page state, settings and SyncTeX callbacks belong to each document window. The mapped-surface size override prevents GTK from restoring a stale size over a yabai resize.
+
 ## Components, in dependency order
 
 | Order | Formula | Purpose |
@@ -36,7 +38,7 @@ The four plugins use the core headers at build time; the final app depends on al
 
 Custom sources are pinned by commit and SHA-256. The unmodified Homebrew dependencies, including Girara, follow Homebrew core rather than being frozen by this tap.
 
-Patches are embedded in their owning formulae: API metadata in `synctex.rb`, initial forward-search queueing and macOS ZIP-container routing in `zathura-core.rb`, and the XPS MIME alias in `zathura-pdf-mupdf.rb`. They need no separate downloads or development workspace. The routing fix prevents XPS documents detected as generic ZIP files from going to the comic plugin.
+The macOS changes live in the `macos` branches of the [Zathura](https://github.com/Icecreambobcat/zathura/tree/macos), [SyncTeX](https://github.com/Icecreambobcat/synctex/tree/macos) and [MuPDF plugin](https://github.com/Icecreambobcat/zathura-pdf-mupdf/tree/macos) forks. Formulae download immutable commit archives with SHA-256 checksums; there are no embedded patches. The [development workspace](https://github.com/Icecreambobcat/zathura-macos) records all seven components as submodules and builds editable sources separately from the installed app. The ZIP-container routing fix keeps XPS documents out of the comic plugin.
 
 ## App and default openers
 
@@ -72,7 +74,7 @@ set synctex-editor-command "/opt/homebrew/bin/nvim --headless -c \"VimtexInverse
 
 On Intel Macs, replace `/opt/homebrew` with the Homebrew prefix. The callback requires VimTeX to load in the headless Neovim process as well as in the editing instance. VimTeX can supply its own callback through `-x`; `ZATHURA_SYNCTEX_EDITOR` is also supported. No smoke-test callback or editor dependency is bundled.
 
-CLI and app launches share a private per-user bus at `/tmp/zathura-<uid>-homebrew`. The launcher checks ownership/permissions, serialises startup and restarts a dead bus on the next launch. It does not install a launchd job or run `brew services`.
+CLI and app launches share a private per-user bus at `/tmp/zathura-<uid>/bus`. The launcher checks ownership/permissions, serialises startup and restarts a dead bus on the next launch. It does not install a launchd job or run `brew services`.
 
 ## Maintenance and checks
 
@@ -80,6 +82,8 @@ Changes to app assets require a `zathura` revision bump. The app contains a copy
 
 The existing Homebrew test-bot workflow builds/tests changed formulae and uploads bottles for pull requests; the publishing workflow retains the `pr-pull` label flow. Direct pushes do not publish bottles automatically. Until bottles are published, the custom formulae build from source.
 
-Local packaging verification used fresh pinned source archives and the embedded patches, generated the manuals, compiled all four plugins, exercised the app formula’s assembly with staged dependency paths, verified its strict signature, opened two-page PDF/DjVu/PS/CBZ/CBT/XPS fixtures, and checked repeated forward SyncTeX and the parsed personal callback. XPS content was also opened with an `.oxps` extension; this is not a genuine OpenXPS conformance test. Launch Services listed the app as a Viewer for all 24 declared types.
+Revision 8 builds from the tracked fork archives. Homebrew type checking, changed-formula style checks, strict audit, formula tests, linkage and strict bundle-signature verification passed locally. Native ASan/UBSan tests passed, including session isolation, pending-open cancellation and inverse-callback source routing. Live geometry regression passed eight float/retile cycles and six neighbouring-window open/close cycles in both the isolated test app and the installed app. The installed app also passed Launch Services multi-file reuse, stdin cleanup and independent document closure.
 
-A subsequent Homebrew source install and all seven formula tests passed, including strict verification of the installed app signature. Launch Services registration runs on normal viewer startup because Homebrew’s install sandbox blocks it. Published bottles have not been tested. The earlier handoff verified reload and real-click inverse search; those were not repeated for this package. RAR/7-Zip rendering, live-viewer bus reconnection, reboot recovery and Intel builds remain unverified. Trackpad smoothness is unchanged.
+Physical Ctrl-clicks in both installed-app PDFs reached their own separate VimTeX editors at source line 3, column 1. AppKit reported one regular native app, with the Mach-O viewer as its bundle executable; Launch Services listed it as a PDF opener candidate without changing defaults.
+
+RAR/7-Zip rendering, live-viewer bus reconnection, reboot recovery and Intel runtime behaviour remain unverified. Trackpad smoothness was not changed.

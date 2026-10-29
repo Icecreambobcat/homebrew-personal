@@ -20,6 +20,8 @@
 <string>Zathura.icns</string>
 <key>NSHighResolutionCapable</key>
 <true/>
+<key>LSMultipleInstancesProhibited</key>
+<true/>
 <key>NSPrincipalClass</key>
 <string>NSApplication</string>
 <key>CFBundleDocumentTypes</key>

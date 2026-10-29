@@ -1,6 +1,7 @@
 name: brew test-bot
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -12,6 +13,7 @@ jobs:
       matrix:
         os: [ macos-15-intel, macos-26 ]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     permissions:
       actions: read
       checks: read
@@ -42,8 +44,14 @@ jobs:
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
 
+      - name: Build the full Zathura stack on request
+        if: github.event_name == 'workflow_dispatch'
+        run: >-
+          brew test-bot --only-formulae
+          --testing-formulae=synctex,zathura-core,zathura-pdf-mupdf,zathura-djvu,zathura-ps,zathura-cb,zathura
+
       - name: Upload bottles as artifact
-        if: always() && github.event_name == 'pull_request'
+        if: always() && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-artifact@v4
         with:
           name: bottles_${{ matrix.os }}
