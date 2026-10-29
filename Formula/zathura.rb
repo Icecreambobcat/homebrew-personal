@@ -7,6 +7,11 @@ class Zathura < Formula
   license "Zlib"
   revision 8
 
+  bottle do
+    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/zathura-2026.10.23_8"
+    sha256 cellar: :any, arm64_golden_gate: "a1d119739e4c33ee4a1b5146ccefe0b22256d10e2cf90295b73f2888fbdfc222"
+  end
+
   depends_on arch: :arm64
   depends_on "cairo"
   depends_on "dbus"
