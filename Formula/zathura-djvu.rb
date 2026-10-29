@@ -5,6 +5,7 @@ class ZathuraDjvu < Formula
   version "2026.07.18"
   sha256 "c114769a8db1bea50890e4508d80864648291439be996c7bf7e33e237082339f"
   license "Zlib"
+  revision 1
 
   depends_on "gettext" => :build
   depends_on "icecreambobcat/personal/zathura-core" => :build
@@ -14,6 +15,7 @@ class ZathuraDjvu < Formula
   depends_on "cairo"
   depends_on "djvulibre"
   depends_on "girara"
+  depends_on "glib"
   depends_on :macos
 
   def install

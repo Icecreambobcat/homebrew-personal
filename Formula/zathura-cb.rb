@@ -5,6 +5,7 @@ class ZathuraCb < Formula
   version "2026.07.18"
   sha256 "ec5d3a2d32be57ec5da92868687a851b7d051980c60e988ef566e5858e51778d"
   license "Zlib"
+  revision 1
 
   depends_on "gettext" => :build
   depends_on "icecreambobcat/personal/zathura-core" => :build
@@ -12,7 +13,9 @@ class ZathuraCb < Formula
   depends_on "ninja" => :build
   depends_on "pkgconf" => :build
   depends_on "cairo"
+  depends_on "gdk-pixbuf"
   depends_on "girara"
+  depends_on "glib"
   depends_on "gtk4"
   depends_on "libarchive"
   depends_on :macos
