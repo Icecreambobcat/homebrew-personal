@@ -1,0 +1,6 @@
+paths:
+  .github/workflows/tests.yml:
+    ignore:
+      # Documented hosted label, missing from actionlint's bundled runner list:
+      # https://github.com/actions/runner-images#available-images
+      - '^label "xcode-27" is unknown\.'

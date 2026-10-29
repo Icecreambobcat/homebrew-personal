@@ -1,6 +1,6 @@
 # Personal Homebrew tap
 
-GTK 4 Zathura for macOS, with the MuPDF, DjVu, PostScript and comic-book plugins.
+GTK 4 Zathura for Apple Silicon Macs running macOS 27 or later, with the MuPDF, DjVu, PostScript and comic-book plugins. Intel Macs are not supported.
 
 ## Install
 
@@ -72,7 +72,7 @@ set synctex true
 set synctex-editor-command "/opt/homebrew/bin/nvim --headless -c \"VimtexInverseSearch %{line}:%{column} '%{input}'\""
 ```
 
-On Intel Macs, replace `/opt/homebrew` with the Homebrew prefix. The callback requires VimTeX to load in the headless Neovim process as well as in the editing instance. VimTeX can supply its own callback through `-x`; `ZATHURA_SYNCTEX_EDITOR` is also supported. No smoke-test callback or editor dependency is bundled.
+The callback requires VimTeX to load in the headless Neovim process as well as in the editing instance. VimTeX can supply its own callback through `-x`; `ZATHURA_SYNCTEX_EDITOR` is also supported. No smoke-test callback or editor dependency is bundled.
 
 CLI and app launches share a private per-user bus at `/tmp/zathura-<uid>/bus`. The launcher checks ownership/permissions, serialises startup and restarts a dead bus on the next launch. It does not install a launchd job or run `brew services`.
 
@@ -80,10 +80,10 @@ CLI and app launches share a private per-user bus at `/tmp/zathura-<uid>/bus`. T
 
 Changes to app assets require a `zathura` revision bump. The app contains a copy of the core executable, so core updates also require rebuilding/bumping the top-level formula. An upstream plugin ABI change requires rebuilding the plugins together.
 
-The Homebrew test-bot workflow builds all seven packages for Zathura-related pull requests and manual runs, and checks that every Apple Silicon bottle was produced. Other pull requests use changed-formula detection. Intel builds can be skipped when dependencies lack compatible bottles; a green job alone does not verify them. The publishing workflow uses the `pr-pull` label. Direct pushes do not publish bottles automatically. Until bottles are published, the custom formulae build from source.
+The Homebrew test-bot workflow targets macOS 27 on Apple Silicon using GitHub's [`xcode-27` runner](https://github.com/actions/runner-images#available-images). Zathura-related pull requests and manual runs build all seven packages and require all seven `arm64_golden_gate` bottles. Other pull requests use changed-formula detection. Validate local source builds, bottle pours, strict linkage and formula tests before running CI. The publishing workflow uses the `pr-pull` label. Direct pushes do not publish bottles automatically. Until bottles are published, the custom formulae build from source.
 
-Revision 8 builds from the tracked fork archives. Homebrew type checking, changed-formula style checks, strict audit, formula tests, linkage and strict bundle-signature verification passed locally. Native ASan/UBSan tests passed, including session isolation, pending-open cancellation and inverse-callback source routing. Live geometry regression passed eight float/retile cycles and six neighbouring-window open/close cycles in both the isolated test app and the installed app. The installed app also passed Launch Services multi-file reuse, stdin cleanup and independent document closure.
+All seven packages passed clean source builds, bottling and named-formula bottle installs locally on macOS 27/Apple Silicon. Both the source installs and bottle pours passed strict linkage checks and formula tests; install receipts confirmed the pours used bottles. The poured app passed strict signature verification and the live multi-window regression. Revision 8 builds from the tracked fork archives. Homebrew type checking, changed-formula style checks and strict audit also passed locally. Native ASan/UBSan tests passed, including session isolation, pending-open cancellation and inverse-callback source routing. Live geometry regression passed eight float/retile cycles and six neighbouring-window open/close cycles in both the isolated test app and the installed app. The installed app also passed Launch Services multi-file reuse, stdin cleanup and independent document closure.
 
 Physical Ctrl-clicks in both installed-app PDFs reached their own separate VimTeX editors at source line 3, column 1. AppKit reported one regular native app, with the Mach-O viewer as its bundle executable; Launch Services listed it as a PDF opener candidate without changing defaults.
 
-RAR/7-Zip rendering, live-viewer bus reconnection, reboot recovery and Intel runtime behaviour remain unverified. Trackpad smoothness was not changed.
+RAR/7-Zip rendering, live-viewer bus reconnection and reboot recovery remain unverified. Trackpad smoothness was not changed.
