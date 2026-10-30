@@ -7,6 +7,11 @@ class ZathuraCore < Formula
   license "Zlib"
   revision 9
 
+  bottle do
+    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/zathura-core-2026.10.23_9"
+    sha256 arm64_golden_gate: "972afe4b0d95395a2496dcafdea9dda27e3ef605b53962dd424c982934c64f67"
+  end
+
   keg_only "the zathura formula provides the launcher and app"
 
   depends_on "meson" => :build
