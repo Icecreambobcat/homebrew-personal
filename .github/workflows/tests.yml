@@ -69,6 +69,9 @@ jobs:
 
       - name: Render-test the bottled stack outside the formula-test sandbox
         if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+        env:
+          # Homebrew permits local bottle paths in developer mode, as used by test-bot.
+          HOMEBREW_DEVELOPER: "1"
         run: |
           if compgen -G 'zathura--*.arm64_golden_gate.bottle.tar.gz' > /dev/null; then
             for formula in synctex zathura-core zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb zathura; do
