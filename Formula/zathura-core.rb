@@ -5,12 +5,7 @@ class ZathuraCore < Formula
   version "2026.10.23"
   sha256 "2535436cf8bec6600ca5b1992f3180106f4ab436ed68f533692b895c3c8a9aee"
   license "Zlib"
-  revision 8
-
-  bottle do
-    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/zathura-core-2026.10.23_8"
-    sha256 arm64_golden_gate: "21ca685cfb24837138e75a0e8bec3035c08447836016aba290bdf22124fc1506"
-  end
+  revision 9
 
   keg_only "the zathura formula provides the launcher and app"
 

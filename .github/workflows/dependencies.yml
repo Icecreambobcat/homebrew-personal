@@ -1,0 +1,28 @@
+name: Published Zathura compatibility
+on:
+  schedule:
+    - cron: "23 20 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  published-bottles:
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: Homebrew/actions/setup-homebrew@main
+      - run: brew tap icecreambobcat/personal && brew trust --tap icecreambobcat/personal
+      - name: Install published bottles with current dependencies
+        run: brew install --force-bottle icecreambobcat/personal/zathura
+      - name: Check dependency compatibility without rebuilding consumers
+        run: python3 "$(brew --repository icecreambobcat/personal)/scripts/check-zathura-dependencies.py"
+      - name: Render published documents outside the formula-test sandbox
+        run: |
+          python3 "$(brew --prefix zathura)/share/zathura/smoke-test.py" \
+            "$(brew --prefix zathura)/Zathura.app" "$(brew --repository)/Library/Homebrew/test/support/fixtures" "$(brew --prefix)"
+      - name: Test published stack
+        run: |
+          for formula in synctex zathura-core zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb zathura; do
+            brew linkage --test --strict "icecreambobcat/personal/$formula"
+            brew test "icecreambobcat/personal/$formula"
+          done

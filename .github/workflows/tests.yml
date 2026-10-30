@@ -67,6 +67,19 @@ jobs:
             done
           fi
 
+      - name: Render-test the bottled stack outside the formula-test sandbox
+        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+        run: |
+          if compgen -G 'zathura--*.arm64_golden_gate.bottle.tar.gz' > /dev/null; then
+            for formula in synctex zathura-core zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb zathura; do
+              brew install ./"$formula"--*.arm64_golden_gate.bottle.tar.gz
+              brew postinstall "icecreambobcat/personal/$formula"
+            done
+            python3 scripts/check-zathura-dependencies.py
+            python3 "$(brew --prefix zathura)/share/zathura/smoke-test.py" \
+              "$(brew --prefix zathura)/Zathura.app" "$(brew --repository)/Library/Homebrew/test/support/fixtures" "$(brew --prefix)"
+          fi
+
       - name: Upload bottles as artifact
         if: always() && (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-artifact@v4

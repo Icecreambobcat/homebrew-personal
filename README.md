@@ -76,7 +76,53 @@ The callback requires VimTeX to load in the headless Neovim process as well as i
 
 CLI and app launches share a private per-user bus at `/tmp/zathura-<uid>/bus`. The launcher checks ownership/permissions, serialises startup and restarts a dead bus on the next launch. It does not install a launchd job or run `brew services`.
 
-## Maintenance and checks
+
+## Dependency upgrades and release procedure
+
+Source pins do not freeze Homebrew runtime libraries. Packaging unchanged upstream
+code still requires rebuilding its consumers when binary compatibility changes.
+
+- Rebuild the MuPDF plugin for each MuPDF version change unless compatibility is
+  explicitly verified. Never bypass its version guard.
+- Compare bottle receipts with current dependency compatibility metadata using
+  `python3 scripts/check-zathura-dependencies.py`. Investigate changed compatibility
+  values and rebuild affected consumers; ordinary compatible updates need no blanket rebuild.
+- Keep core and app revisions aligned because the app copies the core executable.
+  Rebuild plugins for plugin API/ABI changes. Source changes are not required for
+  a packaging revision bump.
+- Keep plugin symlinks on `opt` paths. Check the raw targets after a named-formula
+  bottle pour, not just after building. Declarative post-install steps restore links.
+- Test published bottles against current dependencies before rebuilding consumers.
+  The daily compatibility workflow does this without silently rebuilding the stack.
+  A failed run requires a reviewed revision bump and replacement bottles.
+
+Before remote CI, build, bottle and locally pour all seven packages in dependency
+order. Use `brew install --build-bottle`, then `brew bottle --json`; neither
+`upgrade` nor `reinstall` accepts `--build-bottle`. Use a temporary loopback bottle
+URL with the named formula, verify `poured_from_bottle` in receipts, and restore
+publication metadata before committing. Run `brew postinstall` after local
+reinstalls: Homebrew can preserve build-bottle mode and skip signature/link repair.
+Run formula tests, `brew linkage --test --strict`, signature checks and real
+document tests on the poured stack.
+Run `python3 "$(brew --prefix zathura)/share/zathura/smoke-test.py"
+"$(brew --prefix zathura)/Zathura.app"
+"$(brew --repository)/Library/Homebrew/test/support/fixtures" "$(brew --prefix)"`
+to open and render PDF, DjVu, PostScript and comic fixtures in a disposable app
+with a private bus. Release and maintenance CI require this outside the formula-test
+sandbox, which prevents macOS GUI registration. Dylib existence and `--version` are not
+sufficient tests. Run the separate real-fixture SyncTeX/multiwindow regression too.
+
+Push the locally validated branch over SSH and open a PR. Require all seven CI
+bottle artifacts and passing checks before applying `pr-pull`. Verify public
+named-formula pours after publication. Fast-forward the installed tap and align
+the workspace packaging gitlink to the resulting published main commit; publication
+cherry-picks can give it a different hash from the tested branch.
+
+Preserve personal configuration, default handlers and existing document windows.
+Remove generated builds, fixtures, staging files, temporary bottle metadata and
+local bottles after verification; retain reports. Stop only test-owned D-Bus daemons.
+
+## Earlier verification
 
 Changes to app assets require a `zathura` revision bump. The app contains a copy of the core executable, so core updates also require rebuilding/bumping the top-level formula. An upstream plugin ABI change requires rebuilding the plugins together.
 

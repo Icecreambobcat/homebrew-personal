@@ -5,12 +5,7 @@ class Zathura < Formula
   version "2026.10.23"
   sha256 "2535436cf8bec6600ca5b1992f3180106f4ab436ed68f533692b895c3c8a9aee"
   license "Zlib"
-  revision 8
-
-  bottle do
-    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/zathura-2026.10.23_8"
-    sha256 cellar: :any, arm64_golden_gate: "a1d119739e4c33ee4a1b5146ccefe0b22256d10e2cf90295b73f2888fbdfc222"
-  end
+  revision 9
 
   depends_on arch: :arm64
   depends_on "cairo"
@@ -58,9 +53,13 @@ class Zathura < Formula
            app/"Contents/Info.plist"
     cp assets/"Zathura.icns", resources/"Zathura.icns"
     cp assets/"session.conf", resources/"session.conf"
-    %w[zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb].each do |name|
-      (libexec/"plugins").install_symlink Dir[formula_opt_lib("icecreambobcat/personal/#{name}")/"zathura/*.dylib"]
+    (libexec/"plugins").mkpath
+    %w[pdf-mupdf djvu ps cb].each do |plugin|
+      ln_s HOMEBREW_PREFIX/"opt/zathura-#{plugin}/lib/zathura/lib#{plugin}.dylib",
+           libexec/"plugins/lib#{plugin}.dylib"
     end
+    pkgshare.mkpath
+    cp assets/"smoke-test.py", pkgshare/"smoke-test.py"
     bin.mkpath
     (bin/"zathura").write <<~SH
       #!/bin/sh
@@ -77,6 +76,15 @@ class Zathura < Formula
   end
 
   post_install_steps do
+    # Bottling can resolve opt symlinks into versioned Cellar paths. Restore them after pouring.
+    symlink "opt/zathura-pdf-mupdf/lib/zathura/libpdf-mupdf.dylib", "libexec/plugins/libpdf-mupdf.dylib",
+            source_base: :homebrew_prefix, overwrite: true
+    symlink "opt/zathura-djvu/lib/zathura/libdjvu.dylib", "libexec/plugins/libdjvu.dylib",
+            source_base: :homebrew_prefix, overwrite: true
+    symlink "opt/zathura-ps/lib/zathura/libps.dylib", "libexec/plugins/libps.dylib",
+            source_base: :homebrew_prefix, overwrite: true
+    symlink "opt/zathura-cb/lib/zathura/libcb.dylib", "libexec/plugins/libcb.dylib",
+            source_base: :homebrew_prefix, overwrite: true
     # Bottle relocation may change Mach-O load paths after the build-time signature.
     run "/usr/bin/codesign",
         args:           ["--force", "--deep", "--sign", "-", "{{opt_prefix}}/Zathura.app"],
@@ -105,6 +113,12 @@ class Zathura < Formula
   end
 
   test do
+    %w[pdf-mupdf djvu ps cb].each do |plugin|
+      link = libexec/"plugins/lib#{plugin}.dylib"
+      assert_equal HOMEBREW_PREFIX/"opt/zathura-#{plugin}/lib/zathura/lib#{plugin}.dylib",
+                   (link.dirname/link.readlink).cleanpath
+    end
+    assert_path_exists pkgshare/"smoke-test.py"
     output = shell_output("#{bin}/zathura --version")
     assert_match version.to_s, output
     %w[pdf-mupdf djvu ps cb].each { |name| assert_match name, output }

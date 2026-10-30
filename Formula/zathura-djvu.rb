@@ -5,12 +5,7 @@ class ZathuraDjvu < Formula
   version "2026.07.18"
   sha256 "c114769a8db1bea50890e4508d80864648291439be996c7bf7e33e237082339f"
   license "Zlib"
-  revision 1
-
-  bottle do
-    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/zathura-djvu-2026.07.18_1"
-    sha256 cellar: :any, arm64_golden_gate: "9d5bb08b8c230de03b17212811a19a30688baf7ee4fa9b3d134c489b242d130d"
-  end
+  revision 2
 
   depends_on "gettext" => :build
   depends_on "icecreambobcat/personal/zathura-core" => :build

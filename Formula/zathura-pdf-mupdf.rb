@@ -5,12 +5,7 @@ class ZathuraPdfMupdf < Formula
   version "2026.07.18"
   sha256 "edf9849826ec91c3aa1268675d0ebfd0f72cc10dbba89c57fa8f634344c8ecfe"
   license "Zlib"
-  revision 1
-
-  bottle do
-    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/zathura-pdf-mupdf-2026.07.18_1"
-    sha256 cellar: :any, arm64_golden_gate: "57fddbeded9cb8c0014d7819589b9fbe97096f7decb0b4ec56cb5cb242ef2f9c"
-  end
+  revision 2
 
   depends_on "gettext" => :build
   depends_on "icecreambobcat/personal/zathura-core" => :build
