@@ -7,6 +7,11 @@ class Synctex < Formula
   license "MIT"
   revision 2
 
+  bottle do
+    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/synctex-2024_2"
+    sha256 cellar: :any, arm64_golden_gate: "956813745aae4554ec8cd935487b34b658f1dab526cf79883020fc153bba76dd"
+  end
+
   keg_only "avoid shadowing the SyncTeX command supplied by TeX distributions"
 
   depends_on "meson" => :build
