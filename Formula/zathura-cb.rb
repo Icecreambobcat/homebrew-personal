@@ -7,6 +7,11 @@ class ZathuraCb < Formula
   license "Zlib"
   revision 2
 
+  bottle do
+    root_url "https://github.com/Icecreambobcat/homebrew-personal/releases/download/zathura-cb-2026.07.18_2"
+    sha256 cellar: :any, arm64_golden_gate: "34d6201fae0c6b974e591caf2474e210d6f0007ea4a78494d10f779eb6d256f8"
+  end
+
   depends_on "gettext" => :build
   depends_on "icecreambobcat/personal/zathura-core" => :build
   depends_on "meson" => :build
