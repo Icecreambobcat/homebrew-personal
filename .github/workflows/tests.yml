@@ -75,8 +75,14 @@ jobs:
         run: |
           if compgen -G 'zathura--*.arm64_golden_gate.bottle.tar.gz' > /dev/null; then
             for formula in synctex zathura-core zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb zathura; do
+              # test-bot removes dependencies but can leave the tested keg installed.
+              brew install --only-dependencies ./"$formula"--*.arm64_golden_gate.bottle.tar.gz
               brew install ./"$formula"--*.arm64_golden_gate.bottle.tar.gz
-              brew postinstall "icecreambobcat/personal/$formula"
+            done
+            brew postinstall icecreambobcat/personal/zathura
+            for formula in synctex zathura-core zathura-pdf-mupdf zathura-djvu zathura-ps zathura-cb zathura; do
+              brew linkage --test --strict "icecreambobcat/personal/$formula"
+              brew test "icecreambobcat/personal/$formula"
             done
             python3 scripts/check-zathura-dependencies.py
             python3 "$(brew --prefix zathura)/share/zathura/smoke-test.py" \
